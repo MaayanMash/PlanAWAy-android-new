@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/MyTasks"
+        android:text="My Tasks"
+        android:title="My Tasks"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/EditMyAccount"
+        android:text="Edit My Account"
+        android:title="Edit My Account"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/Logout"
+        android:title="Log Out"
+        app:showAsAction="never" />
+
+</menu>
