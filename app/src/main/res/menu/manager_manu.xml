@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/MyDrivers"
+        android:text="My Drivers"
+        android:title="My Drivers"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/DailyDestinations"
+        android:text="Daily Destinations"
+        android:title="Daily Destinations"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/EditMyAccount"
+        android:text="Edit My Account"
+        android:title="Edit My Account"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/Logout"
+        android:title="Log Out"
+        app:showAsAction="never" />
+
+
+</menu>

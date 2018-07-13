@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.example.maayanmash.finalproject.Model.Model;
 import com.example.maayanmash.finalproject.Model.entities.Destination;
 import com.example.maayanmash.finalproject.Model.entities.TaskRow;
 import com.example.maayanmash.finalproject.Model.entities.User;
@@ -23,16 +24,36 @@ public class MainActivity extends AppCompatActivity {
         uID = getIntent().getExtras().getString("uid");
 
         if (savedInstanceState == null) {
-            MapFragment fragment = new MapFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("uid", uID);
-            fragment.setArguments(bundle);
 
 
-            FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
-            tran.replace(R.id.main_container,fragment);
-            tran.addToBackStack("");
-            tran.commit();
+            Model.instance.getMyUserDetails(uID, new GetUserDetailsCallback() {
+
+                        @Override
+                        public void onComplete(User user) {
+                            if (user.isManager()) {
+                                FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
+                                ManagerFragment managerFragment= new ManagerFragment();
+                                tran.replace(R.id.main_container, managerFragment);
+                                tran.addToBackStack("");
+                                tran.commit();
+                            }
+                            else{
+                                MapFragment fragment = new MapFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("uid", uID);
+                                fragment.setArguments(bundle);
+                                FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
+                                tran.replace(R.id.main_container,fragment);
+                                tran.addToBackStack("");
+                                tran.commit();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure() {
+
+                        }
+                    });
         }
     }
 

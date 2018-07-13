@@ -13,6 +13,7 @@ public class User {
     private Double longitude;
     private String image;
     private String mID;
+    private boolean manager;
 
     public String getuID() {
         return uID;
@@ -86,7 +87,15 @@ public class User {
         this.mID = mID;
     }
 
-    public User(String uID, String name,String email, String phone, String address, Double latitude, Double longitude, String image, String mID) {
+    public boolean isManager() {
+        return manager;
+    }
+
+    public void setManager(boolean manager) {
+        this.manager = manager;
+    }
+
+    public User(String uID, String name,String email, String phone, String address, Double latitude, Double longitude, String image, String mID, boolean manager) {
 
         this.uID = uID;
         this.name = name;
@@ -97,6 +106,8 @@ public class User {
         this.longitude = longitude;
         this.image = image;
         this.mID = mID;
+        this.manager=false;
+        this.manager=manager;
     }
 
     @Override
@@ -111,6 +122,7 @@ public class User {
                 ", longitude=" + longitude +
                 ", image='" + image + '\'' +
                 ", mID='" + mID + '\'' +
+                ", manager='" + manager + '\'' +
                 '}';
     }
 }

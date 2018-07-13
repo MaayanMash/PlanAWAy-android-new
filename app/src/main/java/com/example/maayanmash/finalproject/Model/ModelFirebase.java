@@ -51,7 +51,8 @@ public class ModelFirebase {
                     Double latitude = (Double) map.get("latitude");
                     Double longitude = (Double) map.get("longitude");
                     String image = (String) map.get("image");
-                    User user = new User(uID, name, email, phone, address, latitude, longitude, image, mid);
+                    Boolean manager= (boolean)map.get("manager");
+                    User user = new User(uID, name, email, phone, address, latitude, longitude, image, mid,manager);
                     callback.onComplete(user);
                 } else callback.onFailure();
             }
