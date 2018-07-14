@@ -1,27 +1,34 @@
 package com.example.maayanmash.finalproject.Model.entities;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity
 public class User {
-    private String uID;
-    private String name;
-    private String email;
-    private String phone;
-    private String address;
-    private Double latitude;
-    private Double longitude;
-    private String image;
-    private String mID;
-    private boolean manager;
+    @PrimaryKey
+    @NonNull
+    public String uid;
+    public String name;
+    public String email;
+    public String phone;
+    public String address;
+    public Double latitude;
+    public Double longitude;
+    public String image;
+    public String mid;
+    public boolean manager;
 
-    public String getuID() {
-        return uID;
-    }
+    public User(){}
 
-    public void setuID(String uID) {
-        this.uID = uID;
-    }
+    @NonNull
+    public String getUid() {return uid;}
+
+    public void setUid(@NonNull String uid) {this.uid = uid;}
+
+    public String getMid() {return mid;}
+
+    public void setMid(String mid) {this.mid = mid;}
 
     public String getName() {
         return name;
@@ -79,14 +86,6 @@ public class User {
         this.image = image;
     }
 
-    public String getmID() {
-        return mID;
-    }
-
-    public void setmID(String mID) {
-        this.mID = mID;
-    }
-
     public boolean isManager() {
         return manager;
     }
@@ -97,7 +96,7 @@ public class User {
 
     public User(String uID, String name,String email, String phone, String address, Double latitude, Double longitude, String image, String mID, boolean manager) {
 
-        this.uID = uID;
+        this.uid = uID;
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -105,7 +104,7 @@ public class User {
         this.latitude = latitude;
         this.longitude = longitude;
         this.image = image;
-        this.mID = mID;
+        this.mid = mID;
         this.manager=false;
         this.manager=manager;
     }
@@ -113,7 +112,7 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "uID='" + uID + '\'' +
+                "uID='" + uid + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
@@ -121,7 +120,7 @@ public class User {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", image='" + image + '\'' +
-                ", mID='" + mID + '\'' +
+                ", mID='" + mid + '\'' +
                 ", manager='" + manager + '\'' +
                 '}';
     }

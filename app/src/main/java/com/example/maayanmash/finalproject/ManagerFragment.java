@@ -129,6 +129,10 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
         FragmentTransaction tran = getActivity().getSupportFragmentManager().beginTransaction();
         switch (item.getItemId()) {
             case R.id.MyDrivers:
+                UserListFragment fragment =new UserListFragment();
+                tran.replace(R.id.main_container, fragment);
+                tran.addToBackStack("");
+                tran.commit();
                 return true;
             case R.id.DailyDestinations:
                 return true;

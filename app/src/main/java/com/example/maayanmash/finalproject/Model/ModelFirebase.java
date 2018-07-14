@@ -25,15 +25,60 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.sql.Ref;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class ModelFirebase {
     private String uID;
     public static String todayTaskID;
+    ValueEventListener eventListener;
+
+    public void cancellGetAllUsers() {
+        DatabaseReference stRef = FirebaseDatabase.getInstance().getReference().child("users");
+        stRef.removeEventListener(eventListener);
+    }
+
+    interface GetAllUsersListener{
+        public void onSuccess(List<User> userslist);
+    }
+
+    public void getAllUsers(final GetAllUsersListener listener) {
+
+        DatabaseReference stRef = FirebaseDatabase.getInstance().getReference().child("users");
+        eventListener = stRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<User> userList = new LinkedList<>();
+                for (DataSnapshot stSnapshot: dataSnapshot.getChildren()) {
+                    Map<String, Object> map = (Map<String, Object>) stSnapshot.getValue();
+                    String uid= stSnapshot.getKey();
+                    String mid = (String) map.get("mid");
+                    String name = (String) map.get("name");
+                    String email = (String)map.get("email");
+                    String phone = (String) map.get("phone");
+                    String address = (String) map.get("address");
+                    Double latitude = (Double) map.get("latitude");
+                    Double longitude = (Double) map.get("longitude");
+                    String image = (String) map.get("image");
+                    User user = new User(uid, name, email, phone, address, latitude, longitude, image, mid,false);
+                    Log.d("TAG","user: "+name+" "+address);
+                    userList.add(user);
+                }
+                listener.onSuccess(userList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("TAG","onCancelled");
+            }
+        });
+    }
 
     public User getMyUserDetails(final String uID, final MainActivity.GetUserDetailsCallback callback) {
         this.uID = uID;
@@ -72,8 +117,8 @@ public class ModelFirebase {
         Date currentDate = new Date();
         String strDate = dateFormat.format(currentDate);
         String[] holder = strDate.split("-");
-        //String currentTime = holder[0] + "-" + Integer.parseInt(holder[1]) + "-" + Integer.parseInt(holder[2]);
-        String currentTime = "2018-6-3";
+        String currentTime = holder[0] + "-" + Integer.parseInt(holder[1]) + "-" + Integer.parseInt(holder[2]);
+        //String currentTime = "2018-6-3";
         return date.equals(currentTime);
     }
 
@@ -215,6 +260,7 @@ public class ModelFirebase {
 
     public void updateUserDetails(User user){
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        Log.d("TAG",user.toString());
         mDatabase.child("users").child(uID).setValue(user);
     }
 
@@ -222,9 +268,13 @@ public class ModelFirebase {
         //                Image Files                        //
        ///////////////////////////////////////////////////////
 
+
     public void saveImage(Bitmap imageBitmap,String name, final Model.SaveImageListener listener) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference imagesRef = storage.getReference().child("images").child(name);
+
+        Date d = new Date();
+        String new_name = ""+ d.getTime();
+        StorageReference imagesRef = storage.getReference().child("images").child(new_name);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();

@@ -32,9 +32,20 @@ import java.util.List;
 
 public class MyTaskListFragment extends Fragment {
     private ListAdapter adapter = new ListAdapter();
+    String uid;
+    boolean isManager;
 
     public MyTaskListFragment() {
         // Required empty public constructor
+    }
+
+    public static MyTaskListFragment newInstance(String uid, boolean isManager) {
+
+        Bundle args = new Bundle();
+
+        MyTaskListFragment fragment = new MyTaskListFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
 
@@ -78,7 +89,6 @@ public class MyTaskListFragment extends Fragment {
 
     class ListAdapter extends BaseAdapter {
         public List<TaskRow> data = new ArrayList<>();
-
 
         @Override
         public int getCount() {

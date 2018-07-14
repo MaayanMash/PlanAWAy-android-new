@@ -1,9 +1,9 @@
 package com.example.maayanmash.finalproject.Model;
 
-import android.content.Intent;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.webkit.URLUtil;
@@ -18,14 +18,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Model {
     public static Model instance = new Model();
     ModelFirebase modelFirebase;
+    UserListData userListData = new UserListData();
 
     private Model() {
         modelFirebase = new ModelFirebase();
     }
+
+//    public void getAllDrivers(final ModelFirebase.GetAllDriversListener listener){
+//        modelFirebase.getAllDrivers(listener);
+//    }
+    public void cancellGetAllUsers() {
+    modelFirebase.cancellGetAllUsers();
+}
 
     public User getMyUserDetails(final String uID, final MainActivity.GetUserDetailsCallback callback) {
         return modelFirebase.getMyUserDetails(uID, callback);
@@ -55,9 +65,65 @@ public class Model {
         modelFirebase.updateUserDetails(user);
     }
 
+    public LiveData<List<User>> getAllUsers(){
+        return userListData;
+    }
+
+    class UserListData extends  MutableLiveData<List<User>>{
+
+        @Override
+        protected void onActive() {
+            super.onActive();
+            // new thread tsks
+            // 1. get the students list from the local DB
+            UserAsynchDao.getAll(new UserAsynchDao.UserAsynchDaoListener<List<User>>() {
+                @Override
+                public void onComplete(List<User> data) {
+                    // 2. update the live data with the new student list
+                    setValue(data);
+                    Log.d("TAG","got students from local DB " + data.size());
+
+                    // 3. get the student list from firebase
+                    modelFirebase.getAllUsers(new ModelFirebase.GetAllUsersListener() {
+                        @Override
+                        public void onSuccess(List<User> userslist) {
+                            // 4. update the live data with the new student list
+                            setValue(userslist);
+                            Log.d("TAG","got students from firebase " + userslist.size());
+
+                            // 5. update the local DB
+                            UserAsynchDao.insertAll(userslist, new UserAsynchDao.UserAsynchDaoListener<Boolean>() {
+                                @Override
+                                public void onComplete(Boolean data) {
+                                    Log.d("TAG","onComplete");
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        @Override
+        protected void onInactive() {
+            super.onInactive();
+            modelFirebase.cancellGetAllUsers();
+            Log.d("TAG","cancellGetAllStudents");
+        }
+
+        public UserListData() {
+            super();
+            //setValue(AppLocalDb.db.userDao().getAll());
+            setValue(new LinkedList<User>());
+        }
+    }
+
+
+
      ///////////////////////////////////////////////////////
     //                Image Files                        //
    ///////////////////////////////////////////////////////
+
 
     public void saveImage(final Bitmap imageBmp, final String name, final SaveImageListener listener) {
         //1. save the image remotly

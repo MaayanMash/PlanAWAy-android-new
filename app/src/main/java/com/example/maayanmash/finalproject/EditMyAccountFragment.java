@@ -134,7 +134,7 @@ public class EditMyAccountFragment extends Fragment {
 
         //save image
         if (imageBitmap != null) {
-            Model.instance.saveImage(imageBitmap, _user.getuID(), new Model.SaveImageListener() {
+            Model.instance.saveImage(imageBitmap, _user.getUid(), new Model.SaveImageListener() {
                 @Override
                 public void onComplete(String url) {
                     _user.setImage(url);

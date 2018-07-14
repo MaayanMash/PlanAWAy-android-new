@@ -1,6 +1,8 @@
 package com.example.maayanmash.finalproject;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,8 +26,6 @@ public class MainActivity extends AppCompatActivity {
         uID = getIntent().getExtras().getString("uid");
 
         if (savedInstanceState == null) {
-
-
             Model.instance.getMyUserDetails(uID, new GetUserDetailsCallback() {
 
                         @Override
@@ -54,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
+            }
         }
     }
 
