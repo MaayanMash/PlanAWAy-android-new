@@ -1,14 +1,30 @@
 package com.example.maayanmash.finalproject.Model.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import java.util.List;
 
-public class Task {
+@Entity
+public class Tasks {
+    @PrimaryKey
+    @NonNull
+    private String tID;
     private String mID;
     private String uID;
     private String date;
     private List<SubTask> dests;
 
-    public Task(String mID, String uID, String date, List<SubTask> dests) {
+    public Tasks(String tID,String mID, String uID, String date, List<SubTask> dests) {
+        this.tID=tID;
+        this.mID = mID;
+        this.uID = uID;
+        this.date = date;
+        this.dests = dests;
+    }
+
+    public Tasks(String mID, String uID, String date, List<SubTask> dests) {
         this.mID = mID;
         this.uID = uID;
         this.date = date;

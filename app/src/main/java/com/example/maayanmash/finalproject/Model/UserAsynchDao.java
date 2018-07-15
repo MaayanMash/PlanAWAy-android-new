@@ -6,7 +6,6 @@ import java.util.List;
 
 public class UserAsynchDao {
 
-
     interface UserAsynchDaoListener<T>{
         void onComplete(T data);
     }

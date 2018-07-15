@@ -10,6 +10,7 @@ import android.webkit.URLUtil;
 
 import com.example.maayanmash.finalproject.MainActivity;
 import com.example.maayanmash.finalproject.Model.entities.Destination;
+import com.example.maayanmash.finalproject.Model.entities.Tasks;
 import com.example.maayanmash.finalproject.Model.entities.TaskRow;
 import com.example.maayanmash.finalproject.Model.entities.User;
 
@@ -28,6 +29,7 @@ public class Model {
     public static Model instance = new Model();
     ModelFirebase modelFirebase;
     UserListData userListData = new UserListData();
+    //TaskListData taskListData = new TaskListData();
 
     private Model() {
         modelFirebase = new ModelFirebase();
@@ -37,8 +39,16 @@ public class Model {
     modelFirebase.cancellGetAllUsers();
 }
 
+//    public void cancellGetAllTasks() {
+//        modelFirebase.cancellGetAllTasks();
+//    }
+
     public User getMyUserDetails(final String uID, final MainActivity.GetUserDetailsCallback callback) {
         return modelFirebase.getMyUserDetails(uID, callback);
+    }
+
+    public void getDestinationOfDrivers (final MainActivity.GetDestinationsForUserIDCallback callback){
+        modelFirebase.getDestinationOfDrivers(callback);
     }
 
     public String getuID() {
@@ -73,6 +83,10 @@ public class Model {
     public LiveData<List<User>> getAllUsers(){
         return userListData;
     }
+
+//    public LiveData<List<TaskRow>> getAllTaskUser(){
+//        return taskListData;
+//    }
 
     class UserListData extends  MutableLiveData<List<User>>{
 
@@ -121,6 +135,56 @@ public class Model {
             setValue(new LinkedList<User>());
         }
     }
+
+
+//    class TaskListData extends  MutableLiveData<List<TaskRow>>{
+//
+//        @Override
+//        protected void onActive() {
+//            super.onActive();
+//            // 1. get the tasks list from the local DB
+//            TaskAsynchDao.getAll(new TaskAsynchDao.TaskAsynchDaoListener<List<TaskRow>>() {
+//                @Override
+//                public void onComplete(List<TaskRow> data) {
+//                    // 2. update the live data with the new task list
+//                    setValue(data);
+//                    Log.d("TAG","got tasks from local DB " + data.size());
+//
+//                    // 3. get the task list from firebase
+//                    modelFirebase.getMyDestinationsByID(getuID(), new MainActivity.GetDestinationsForUserIDCallback() {
+//                        @Override
+//                        public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+//                            // 4. update the live data with the new student list
+//                            setValue(taskRowList);
+//                            Log.d("TAG","got tasks from firebase " + taskRowList.size());
+//
+//                            // 5. update the local DB
+//                            TaskAsynchDao.insertAll(taskRowList, new TaskAsynchDao.TaskAsynchDaoListener<Boolean>() {
+//                                @Override
+//                                public void onComplete(Boolean data) {
+//                                    Log.d("TAG","onComplete");
+//                                }
+//                            });
+//                        }
+//                    });
+//
+//                }
+//            });
+//        }
+//
+//        @Override
+//        protected void onInactive() {
+//            super.onInactive();
+//            modelFirebase.cancellGetAllUsers();
+//            Log.d("TAG","cancellGetAllStudents");
+//        }
+//
+//        public TaskListData() {
+//            super();
+//            //setValue(AppLocalDb.db.userDao().getAll());
+//            setValue(new LinkedList<TaskRow>());
+//        }
+//    }
 
 
 

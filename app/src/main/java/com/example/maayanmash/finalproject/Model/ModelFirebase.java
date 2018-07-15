@@ -9,11 +9,12 @@ import android.util.Log;
 import com.example.maayanmash.finalproject.MainActivity;
 import com.example.maayanmash.finalproject.Model.entities.Destination;
 import com.example.maayanmash.finalproject.Model.entities.SubTask;
-import com.example.maayanmash.finalproject.Model.entities.Task;
+import com.example.maayanmash.finalproject.Model.entities.Tasks;
 import com.example.maayanmash.finalproject.Model.entities.TaskRow;
 import com.example.maayanmash.finalproject.Model.entities.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,14 +39,43 @@ public class ModelFirebase {
     private String uID;
     public static List<String> todayTaskID= new ArrayList<>();
     ValueEventListener eventListener;
+    //ValueEventListener eventListenerTask;
 
     public void cancellGetAllUsers() {
         DatabaseReference stRef = FirebaseDatabase.getInstance().getReference().child("users");
         stRef.removeEventListener(eventListener);
     }
 
+//    public void cancellGetAllTasks() {
+//        DatabaseReference stRef = FirebaseDatabase.getInstance().getReference().child("tasks");
+//        stRef.removeEventListener(eventListenerTask);
+//    }
+
     interface GetAllUsersListener{
         public void onSuccess(List<User> userslist);
+    }
+
+    public void getDestinationOfDrivers(final MainActivity.GetDestinationsForUserIDCallback callback){
+        Query query = FirebaseDatabase.getInstance().getReference().child("users").orderByChild("mid").equalTo(uID);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<Destination> destinationList= new ArrayList<>();
+                for (DataSnapshot stSnapshot: dataSnapshot.getChildren()) {
+                    Map<String, Object> map = (Map<String, Object>) stSnapshot.getValue();
+                    Double latitude = (Double) map.get("latitude");
+                    Double longitude = (Double) map.get("longitude");
+                    if (latitude!=null && longitude != null)
+                        destinationList.add(new Destination(latitude,longitude));
+                    }
+                    callback.onDestination(destinationList,null,null);
+                }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void getAllUsers(final GetAllUsersListener listener) {
@@ -70,7 +100,6 @@ public class ModelFirebase {
                         User user = new User(uid, name, email, phone, address, latitude, longitude, image, mid,false);
                         userList.add(user);
                     }
-
                 }
                 listener.onSuccess(userList);
             }
@@ -169,12 +198,14 @@ public class ModelFirebase {
 
     public void getMyDestinationsByID(final String uID, final MainActivity.GetDestinationsForUserIDCallback callback) {
         this.uID = uID;
-        final ArrayList<Task> tasks = new ArrayList<Task>();
+        final ArrayList<Tasks> tasks = new ArrayList<Tasks>();
         final ArrayList<Destination> destsToDay = new ArrayList<Destination>();
         final ArrayList<TaskRow> tasksRowList = new ArrayList<>();
 
         Query query = FirebaseDatabase.getInstance().getReference().child("tasks").orderByChild("uid").equalTo(uID);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
+//        Query stRef = FirebaseDatabase.getInstance().getReference().child("tasks").orderByChild("uid").equalTo(uID);
+//        eventListenerTask = stRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final StringBuilder builder = new StringBuilder("");
@@ -212,13 +243,13 @@ public class ModelFirebase {
                                     substasks.add(new SubTask(did, isDone));
                                 }
                             }
-                            Task newTask = new Task(mid, uID, date, substasks);
+                            Tasks newTask = new Tasks(mid, uID, date, substasks);
                             tasks.add(newTask);
                         }
                     }
                 }
                 if (tasks.size() > 0) {
-                    final Task myTask = tasks.get(0);
+                    final Tasks myTask = tasks.get(0);
                     Query query = FirebaseDatabase.getInstance().getReference().child("destinations").orderByChild("mid").equalTo(myTask.getmID());
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -261,7 +292,7 @@ public class ModelFirebase {
 
     public void getDestinationsBymID(final String mID, final MainActivity.GetDestinationsForUserIDCallback callback) {
         this.uID = uID;
-        final ArrayList<Task> tasks = new ArrayList<Task>();
+        final ArrayList<Tasks> tasks = new ArrayList<Tasks>();
         final ArrayList<Destination> destsToDay = new ArrayList<Destination>();
         final ArrayList<TaskRow> tasksRowList = new ArrayList<>();
 
@@ -303,7 +334,8 @@ public class ModelFirebase {
                                     substasks.add(new SubTask(did, isDone));
                                 }
                             }
-                            Task newTask = new Task(mid, uID, date, substasks);
+
+                            Tasks newTask = new Tasks(mid, uID, date, substasks);
                             tasks.add(newTask);
                         }
                     }
@@ -316,7 +348,7 @@ public class ModelFirebase {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     for (DataSnapshot dest : dataSnapshot.getChildren()) {
-                                        for (Task ts : tasks) {
+                                        for (Tasks ts : tasks) {
                                             for (SubTask st : ts.getDests()) {
                                                 if (dest.getKey().equals(st.getdID())) {
                                                     Map<String, Object> map = (Map<String, Object>) dest.getValue();

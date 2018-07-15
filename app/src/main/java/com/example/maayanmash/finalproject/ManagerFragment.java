@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.Display;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -93,6 +95,7 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
         LatLng israel = new LatLng(31.046051, 34.851611999999996);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(israel, zoomLevel));
         getTodayLocation();
+        getDriversLocation();
     }
 
     private void getTodayLocation(){
@@ -118,6 +121,21 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
 
             }
         });
+    }
+
+    public void getDriversLocation(){
+        Model.instance.getDestinationOfDrivers(new MainActivity.GetDestinationsForUserIDCallback() {
+            @Override
+            public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+                for (Destination dest : destinations) {
+                    LatLng latLng = new LatLng(dest.getLatitude(), dest.getLongitude());
+                    MarkerOptions markerOptions= new MarkerOptions().position(latLng).title(dest.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                    mMap.addMarker(markerOptions);
+                }
+
+            }
+        });
+
     }
 
 

@@ -1,20 +1,42 @@
 package com.example.maayanmash.finalproject.Model.entities;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
+@Entity
 public class TaskRow {
+    @PrimaryKey
+    @NonNull
+    private String trID;
     private String address;
     private boolean isDone;
     private String did;
     private String name;
 
 
-    public TaskRow(){
-
+    public TaskRow(String trID,String address, boolean isDone, String did, String name){
+        this.trID=trID;
+        this.address = address;
+        this.isDone = isDone;
+        this.did = did;
+        this.name = name;
     }
+
     public TaskRow(String address, boolean isDone, String did, String name) {
         this.address = address;
         this.isDone = isDone;
         this.did = did;
         this.name = name;
+    }
+
+    @NonNull
+    public String getTrID() {
+        return trID;
+    }
+
+    public void setTrID(@NonNull String trID) {
+        this.trID = trID;
     }
 
     public String getAddress() {

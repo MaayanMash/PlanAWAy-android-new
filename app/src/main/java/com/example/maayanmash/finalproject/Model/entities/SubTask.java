@@ -1,5 +1,8 @@
 package com.example.maayanmash.finalproject.Model.entities;
 
+import android.arch.persistence.room.Entity;
+
+@Entity
 public class SubTask {
     private String dID;
     private boolean isDone;
