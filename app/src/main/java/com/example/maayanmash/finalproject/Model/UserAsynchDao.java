@@ -6,6 +6,7 @@ import java.util.List;
 
 public class UserAsynchDao {
 
+
     interface UserAsynchDaoListener<T>{
         void onComplete(T data);
     }
@@ -28,7 +29,7 @@ public class UserAsynchDao {
     }
 
 
-    static void insertAll(final List<User> students, final UserAsynchDaoListener<Boolean> listener){
+    static void insertAll(final List<User> users, final UserAsynchDaoListener<Boolean> listener){
         class MyAsynchTask extends AsyncTask<List<User>,String,Boolean>{
             @Override
             protected Boolean doInBackground(List<User>... users) {
@@ -45,7 +46,8 @@ public class UserAsynchDao {
             }
         }
         MyAsynchTask task = new MyAsynchTask();
-        task.execute(students);
+        task.execute(users);
     }
+
 
 }

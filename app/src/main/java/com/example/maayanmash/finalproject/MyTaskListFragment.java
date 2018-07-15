@@ -41,11 +41,13 @@ public class MyTaskListFragment extends Fragment {
 
     public static MyTaskListFragment newInstance(String uid, boolean isManager) {
 
+        MyTaskListFragment myFragment = new MyTaskListFragment();
         Bundle args = new Bundle();
+        args.putString("uid", uid);
+        args.putString("isMamager", String.valueOf(isManager));
+        myFragment.setArguments(args);
+        return myFragment;
 
-        MyTaskListFragment fragment = new MyTaskListFragment();
-        fragment.setArguments(args);
-        return fragment;
     }
 
 
@@ -58,18 +60,35 @@ public class MyTaskListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle bundle =this.getArguments();
+        uid = bundle.getString("uid");
+        isManager= Boolean.parseBoolean(bundle.getString("isMamager"));
+
         View view = inflater.inflate(R.layout.fragment_my_task_list, container, false);
         ListView list = view.findViewById(R.id.tasks_list);
 
-        Model.instance.getMyDestinationsByID(Model.instance.getuID(), new MainActivity.GetDestinationsForUserIDCallback() {
-            @Override
-            public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
-                for (TaskRow tr:taskRowList){
-                    adapter.data.add(tr);
+        if(isManager){
+            Model.instance.getDestinationsBymID(uid, new MainActivity.GetDestinationsForUserIDCallback() {
+                @Override
+                public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+                    for (TaskRow tr:taskRowList){
+                        adapter.data.add(tr);
+                    }
+                    adapter.notifyDataSetChanged();
                 }
-                adapter.notifyDataSetChanged();
-            }
-        });
+            });
+        }
+        else {
+            Model.instance.getMyDestinationsByID(uid, new MainActivity.GetDestinationsForUserIDCallback() {
+                @Override
+                public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+                    for (TaskRow tr : taskRowList) {
+                        adapter.data.add(tr);
+                    }
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
 
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -146,13 +165,17 @@ public class MyTaskListFragment extends Fragment {
         FragmentTransaction tran = getActivity().getSupportFragmentManager().beginTransaction();
         switch (item.getItemId()) {
             case R.id.back:
-                MapFragment map_fragment= new MapFragment();
+                Fragment fragment;
+                if(isManager){
+                    fragment= new ManagerFragment();
+                }
+                else {
+                    fragment = new MapFragment();
+                }
                 Bundle bundle = new Bundle();
-                MainActivity activity= (MainActivity) getActivity();
-                bundle.putString("uid", activity.getuID());
-                map_fragment.setArguments(bundle);
-
-                tran.replace(R.id.main_container, map_fragment);
+                bundle.putString("uid", uid);
+                fragment.setArguments(bundle);
+                tran.replace(R.id.main_container, fragment);
                 tran.addToBackStack("tag");
                 tran.commit();
                 return true;

@@ -61,6 +61,11 @@ public class Model {
         modelFirebase.getMyDestinationsByID(uID, callback);
     }
 
+
+    public void getDestinationsBymID(final String mID, final MainActivity.GetDestinationsForUserIDCallback callback) {
+        modelFirebase.getDestinationsBymID(mID, callback);
+    }
+
     public void updateUserDetails(User user) {
         modelFirebase.updateUserDetails(user);
     }
@@ -74,7 +79,6 @@ public class Model {
         @Override
         protected void onActive() {
             super.onActive();
-            // new thread tsks
             // 1. get the students list from the local DB
             UserAsynchDao.getAll(new UserAsynchDao.UserAsynchDaoListener<List<User>>() {
                 @Override

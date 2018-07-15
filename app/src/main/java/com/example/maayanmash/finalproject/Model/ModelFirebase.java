@@ -36,7 +36,7 @@ import java.util.Map;
 
 public class ModelFirebase {
     private String uID;
-    public static String todayTaskID;
+    public static List<String> todayTaskID= new ArrayList<>();
     ValueEventListener eventListener;
 
     public void cancellGetAllUsers() {
@@ -59,16 +59,18 @@ public class ModelFirebase {
                     Map<String, Object> map = (Map<String, Object>) stSnapshot.getValue();
                     String uid= stSnapshot.getKey();
                     String mid = (String) map.get("mid");
-                    String name = (String) map.get("name");
-                    String email = (String)map.get("email");
-                    String phone = (String) map.get("phone");
-                    String address = (String) map.get("address");
-                    Double latitude = (Double) map.get("latitude");
-                    Double longitude = (Double) map.get("longitude");
-                    String image = (String) map.get("image");
-                    User user = new User(uid, name, email, phone, address, latitude, longitude, image, mid,false);
-                    Log.d("TAG","user: "+name+" "+address);
-                    userList.add(user);
+                    if (mid.equals(uID)){
+                        String name = (String) map.get("name");
+                        String email = (String)map.get("email");
+                        String phone = (String) map.get("phone");
+                        String address = (String) map.get("address");
+                        Double latitude = (Double) map.get("latitude");
+                        Double longitude = (Double) map.get("longitude");
+                        String image = (String) map.get("image");
+                        User user = new User(uid, name, email, phone, address, latitude, longitude, image, mid,false);
+                        userList.add(user);
+                    }
+
                 }
                 listener.onSuccess(userList);
             }
@@ -117,8 +119,8 @@ public class ModelFirebase {
         Date currentDate = new Date();
         String strDate = dateFormat.format(currentDate);
         String[] holder = strDate.split("-");
-        String currentTime = holder[0] + "-" + Integer.parseInt(holder[1]) + "-" + Integer.parseInt(holder[2]);
-        //String currentTime = "2018-6-3";
+        //String currentTime = holder[0] + "-" + Integer.parseInt(holder[1]) + "-" + Integer.parseInt(holder[2]);
+        String currentTime = "2018-7-14";
         return date.equals(currentTime);
     }
 
@@ -134,34 +136,34 @@ public class ModelFirebase {
 
     public void updateDestinationArrivalForTask(final String dID, final boolean isDone) {
         final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        for (final String st:todayTaskID) {
+            Query query = FirebaseDatabase.getInstance().getReference("tasks/" + st).child("destinations");
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot dest : dataSnapshot.getChildren()) {
+                        Map<String, Object> subTask = (Map<String, Object>) dest.getValue();
+                        if (subTask.isEmpty() || subTask == null)
+                            return;
 
-        Query query = FirebaseDatabase.getInstance().getReference("tasks/" + todayTaskID).child("destinations");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot dest : dataSnapshot.getChildren()) {
-                    Map<String, Object> subTask = (Map<String, Object>) dest.getValue();
-
-                    if (subTask.isEmpty() || subTask == null)
-                        return;
-
-                    if (((String) subTask.get("did")).equals(dID)) {
-                        firebaseDatabase.getReference("tasks/" + todayTaskID).child("destinations").child("" + dest.getKey().toString()).child("isDone").setValue(isDone);
-                        break;
+                        if (((String) subTask.get("did")).equals(dID)) {
+                            firebaseDatabase.getReference("tasks/" + st).child("destinations").child("" + dest.getKey().toString()).child("isDone").setValue(isDone);
+                            break;
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     public void cleanData(){
         uID = null;
-        todayTaskID = null;
+        todayTaskID.clear();
     }
 
     public void getMyDestinationsByID(final String uID, final MainActivity.GetDestinationsForUserIDCallback callback) {
@@ -181,7 +183,7 @@ public class ModelFirebase {
                         Map<String, Object> map = (Map<String, Object>) task.getValue();
                         if (DateIsToday((String) map.get("date"))) {
                             if (!enteredOnce) {
-                                todayTaskID = task.getKey();
+                                todayTaskID.add(task.getKey());
                                 enteredOnce = true;
                                 builder.append(task.getKey());
                             }
@@ -234,7 +236,6 @@ public class ModelFirebase {
                                             Destination newDest = new Destination(did, mid, name, address, latitude, longitude);
                                             destsToDay.add(newDest);
                                             tasksRowList.add(new TaskRow(address, st.isDone(), did, name));
-
                                         }
                                     }
                                 }
@@ -247,6 +248,99 @@ public class ModelFirebase {
                             Log.d("TAG", "failed to get task");
                         }
                     });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("TAG", "failed to get task");
+            }
+        });
+    }
+
+    public void getDestinationsBymID(final String mID, final MainActivity.GetDestinationsForUserIDCallback callback) {
+        this.uID = uID;
+        final ArrayList<Task> tasks = new ArrayList<Task>();
+        final ArrayList<Destination> destsToDay = new ArrayList<Destination>();
+        final ArrayList<TaskRow> tasksRowList = new ArrayList<>();
+
+        Query query = FirebaseDatabase.getInstance().getReference().child("tasks").orderByChild("mid").equalTo(mID);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final StringBuilder builder = new StringBuilder("");
+                //boolean enteredOnce = false;
+                if (dataSnapshot.exists()) {
+                    //passing on all tasks
+                    for (DataSnapshot task : dataSnapshot.getChildren()) {
+                        Map<String, Object> map = (Map<String, Object>) task.getValue();
+                        if (DateIsToday((String) map.get("date"))) {
+                            todayTaskID.add(task.getKey());
+                            builder.append(task.getKey());
+                            String mid = (String) map.get("mid");
+                            String date = (String) map.get("date");
+                            ArrayList<SubTask> substasks = new ArrayList<>();
+
+                            Object dests = map.get("destinations");
+                            //passing on all destinations in task
+                            if (dests instanceof ArrayList) {
+                                ArrayList<Map> destsMap = (ArrayList<Map>) dests;
+                                for (Map dest : destsMap) {
+                                    String did = (String) dest.get("did");
+                                    boolean isDone = (boolean) dest.get("isDone");
+                                    substasks.add(new SubTask(did, isDone));
+                                }
+
+                            } else if (dests instanceof Map) {
+                                Map<String, Map> destsMap = (Map<String, Map>) dests;
+                                int size = destsMap.size() - 1;
+                                for (int i = 0; i < size; i++) {
+                                    String index = "" + i;
+                                    Map<String, Object> tempMap = destsMap.get(index);
+                                    String did = (String) tempMap.get("did");
+                                    boolean isDone = (boolean) tempMap.get("isDone");
+                                    substasks.add(new SubTask(did, isDone));
+                                }
+                            }
+                            Task newTask = new Task(mid, uID, date, substasks);
+                            tasks.add(newTask);
+                        }
+                    }
+                }
+                if (tasks.size() > 0) {
+                    Log.d("TAG","tasks size= "+tasks.size());
+                        Query query = FirebaseDatabase.getInstance().getReference().child("destinations").orderByChild("mid").equalTo(mID);
+                        query.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    for (DataSnapshot dest : dataSnapshot.getChildren()) {
+                                        for (Task ts : tasks) {
+                                            for (SubTask st : ts.getDests()) {
+                                                if (dest.getKey().equals(st.getdID())) {
+                                                    Map<String, Object> map = (Map<String, Object>) dest.getValue();
+                                                    String did = dest.getKey();
+                                                    String mid = (String) map.get("mid");
+                                                    String name = (String) map.get("name");
+                                                    String address = (String) map.get("address");
+                                                    Double latitude = (Double) map.get("latitude");
+                                                    Double longitude = (Double) map.get("longitude");
+                                                    Destination newDest = new Destination(did, mid, name, address, latitude, longitude);
+                                                    destsToDay.add(newDest);
+                                                    tasksRowList.add(new TaskRow(address, st.isDone(), did, name));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                callback.onDestination(destsToDay, builder.toString(), tasksRowList);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                Log.d("TAG", "failed to get task");
+                            }
+                        });
                 }
             }
 

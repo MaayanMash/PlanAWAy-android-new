@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
                             if (user.isManager()) {
                                 FragmentTransaction tran = getSupportFragmentManager().beginTransaction();
                                 ManagerFragment managerFragment= new ManagerFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("uid", uID);
+                                managerFragment.setArguments(bundle);
                                 tran.replace(R.id.main_container, managerFragment);
                                 tran.addToBackStack("");
                                 tran.commit();
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     });
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if(checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
                 requestPermissions(new String[]{
                         Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
             }

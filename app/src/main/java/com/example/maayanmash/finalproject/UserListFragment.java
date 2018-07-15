@@ -1,6 +1,7 @@
 package com.example.maayanmash.finalproject;
 
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -8,8 +9,12 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,6 +40,13 @@ public class UserListFragment extends Fragment {
     public static UserListFragment newInstance() {
         UserListFragment fragment = new UserListFragment();
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -78,6 +90,34 @@ public class UserListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
 //        mListener = null;
+    }
+
+    //Menu
+    @SuppressLint("ResourceType")
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu,inflater);
+        getActivity().getMenuInflater().inflate(R.menu.back_manu, menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        FragmentTransaction tran = getActivity().getSupportFragmentManager().beginTransaction();
+        switch (item.getItemId()) {
+            case R.id.back:
+                ManagerFragment fragment= new ManagerFragment();
+                Bundle bundle = new Bundle();
+                MainActivity activity= (MainActivity) getActivity();
+                bundle.putString("uid", activity.getuID());
+                fragment.setArguments(bundle);
+
+                tran.replace(R.id.main_container, fragment);
+                tran.addToBackStack("tag");
+                tran.commit();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 

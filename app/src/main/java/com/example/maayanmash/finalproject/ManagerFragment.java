@@ -20,13 +20,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.maayanmash.finalproject.Model.Model;
+import com.example.maayanmash.finalproject.Model.entities.Destination;
+import com.example.maayanmash.finalproject.Model.entities.TaskRow;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -39,6 +46,7 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
     private GoogleMap mMap;
     private MapView mMapView;
     private static final int MY_LOCATION_REQUEST_CODE = 500;
+    private String uID;
 
     public ManagerFragment() {
         // Required empty public constructor
@@ -52,6 +60,8 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle bundle =this.getArguments();
+        uID = bundle.getString("uid");
         try {
             rootView = inflater.inflate(R.layout.fragment_manager, container, false);
             MapsInitializer.initialize(this.getActivity());
@@ -62,7 +72,6 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
         } catch (InflateException e) {
             Log.d("TAG", "Inflate exception");
         }
-
         return rootView;
     }
 
@@ -83,8 +92,35 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
 
         LatLng israel = new LatLng(31.046051, 34.851611999999996);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(israel, zoomLevel));
-
+        getTodayLocation();
     }
+
+    private void getTodayLocation(){
+        final Double[] zoom_lat = new Double[1];
+        final Double[] zoom_long = new Double[1];
+        Model.instance.getDestinationsBymID(uID, new MainActivity.GetDestinationsForUserIDCallback() {
+            @Override
+            public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+                Double sum_lat = 0.0;
+                Double sum_long = 0.0;
+                float zoomLevel = 10;
+                for (Destination dest : destinations) {
+                    LatLng latLng = new LatLng(dest.getLatitude(), dest.getLongitude());
+                    MarkerOptions markerOptions= new MarkerOptions().position(latLng).title(dest.getName());
+                    mMap.addMarker(markerOptions);
+                    sum_lat += dest.getLatitude();
+                    sum_long += dest.getLongitude();
+                }
+                zoom_lat[0] = sum_lat / destinations.size();
+                zoom_long[0] = sum_long / destinations.size();
+                LatLng new_zoom = new LatLng(zoom_lat[0], zoom_long[0]);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new_zoom, zoomLevel));
+
+            }
+        });
+    }
+
+
 
     @Override
     public void onPause() {
@@ -135,6 +171,10 @@ public class ManagerFragment extends Fragment implements OnMapReadyCallback{
                 tran.commit();
                 return true;
             case R.id.DailyDestinations:
+                MyTaskListFragment task_fragment = MyTaskListFragment.newInstance(uID,true);
+                tran.replace(R.id.main_container, task_fragment);
+                tran.addToBackStack("tag");
+                tran.commit();
                 return true;
             case R.id.EditMyAccount:
                 EditMyAccountFragment account_fragment = new EditMyAccountFragment();

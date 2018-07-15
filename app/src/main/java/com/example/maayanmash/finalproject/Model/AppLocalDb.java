@@ -7,7 +7,7 @@ import android.arch.persistence.room.RoomDatabase;
 import com.example.maayanmash.finalproject.Model.entities.User;
 import com.example.maayanmash.finalproject.MyApplication;
 
-@Database(entities = {User.class}, version = 2)
+@Database(entities = {User.class}, version = 1)
 abstract class AppLocalDbRepository extends RoomDatabase {
     public abstract UserDao userDao();
 }

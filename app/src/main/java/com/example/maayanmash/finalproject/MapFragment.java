@@ -92,7 +92,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("TAG","onCreateView");
         Bundle bundle =this.getArguments();
         uid = bundle.getString("uid");
 
@@ -307,7 +306,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         switch (item.getItemId()) {
             case R.id.MyTasks:
                 saveAll();
-                MyTaskListFragment task_fragment = new MyTaskListFragment();
+                MyTaskListFragment task_fragment = MyTaskListFragment.newInstance(uid,false);
                 tran.replace(R.id.main_container, task_fragment);
                 tran.addToBackStack("tag");
                 tran.commit();
