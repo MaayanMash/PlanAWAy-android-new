@@ -200,19 +200,43 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         LatLng israel = new LatLng(31.046051, 34.851611999999996);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(israel, zoomLevel));
 
-        Bundle bundle =this.getArguments();
-        if (bundle.get(LOCATINS)!=null) {
-            List<String> temp = (List<String>) bundle.get(LOCATINS);
-            addAllLocations(temp);
-        }else {
+        if (DestinationList.instance.getData().size()==0)
             getTodayLocation();
+        else
+           updateDestinationList();
+    }
+
+    private void updateDestinationList(){
+        List<Destination> destinationList=DestinationList.instance.getData();
+        Double sum_lat = 0.0;
+        Double sum_long = 0.0;
+        float zoomLevel = 10;
+        for (Destination dest : destinationList) {
+            LatLng latLng = new LatLng(dest.getLatitude(), dest.getLongitude());
+            MarkerOptions markerOptions= new MarkerOptions().position(latLng).title(dest.getName());
+            mMap.addMarker(markerOptions);
+            sum_lat += dest.getLatitude();
+            sum_long += dest.getLongitude();
+            JSONObject jsonObject = new JSONObject();
+            try {
+                String latLng_str = dest.getLatitude() + ", " + dest.getLongitude();
+                jsonObject.put("address", latLng_str);
+                jsonArray.put(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
+        zoom_lat = sum_lat / destinationList.size();
+        zoom_long = sum_long / destinationList.size();
+        LatLng new_zoom = new LatLng(zoom_lat, zoom_long);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new_zoom, zoomLevel));
     }
 
     private void getTodayLocation(){
         Model.instance.getMyDestinationsByID(uid, new MainActivity.GetDestinationsForUserIDCallback() {
             @Override
             public void onDestination(ArrayList<Destination> destinations, String taskID, List<TaskRow> taskRowList) {
+                DestinationList.instance.addAll(destinations);
                 Double sum_lat = 0.0;
                 Double sum_long = 0.0;
                 float zoomLevel = 10;
@@ -249,12 +273,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             Geocoder geocoder = new Geocoder(getContext());
             try {
                 address = geocoder.getFromLocationName(location, 1);
-                Log.d("ADDRESS", address.toString());
                 if (!address.isEmpty()) {
                     LatLng latLng = new LatLng(address.get(0).getLatitude(), address.get(0).getLongitude());
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("address", address.get(0).getLatitude() + ", " + address.get(0).getLongitude());
                     this.jsonArray.put(jsonObject);
+
+                    Destination dest= new Destination(address.get(0).getLatitude(), address.get(0).getLongitude());
+                    DestinationList.instance.addDest(dest);
 
                     MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(location);
                     mMap.addMarker(markerOptions);
@@ -305,14 +331,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         FragmentTransaction tran = getActivity().getSupportFragmentManager().beginTransaction();
         switch (item.getItemId()) {
             case R.id.MyTasks:
-                saveAll();
                 MyTaskListFragment task_fragment = MyTaskListFragment.newInstance(uid,false);
                 tran.replace(R.id.main_container, task_fragment);
                 tran.addToBackStack("tag");
                 tran.commit();
                 return true;
             case R.id.EditMyAccount:
-                saveAll();
                 EditMyAccountFragment account_fragment = new EditMyAccountFragment();
                 tran.replace(R.id.main_container, account_fragment);
                 tran.addToBackStack("tag");
@@ -320,6 +344,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 return true;
             case R.id.Logout:
                 Model.instance.cleanData();
+                DestinationList.instance.clearAll();
                 getActivity().stopService(new Intent(getActivity().getBaseContext(), MyService.class));
                 Intent i = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
                 startActivity(i);
@@ -327,21 +352,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    public void saveAll(){
-        Bundle bundle = new Bundle();
-        bundle.putString("uid",uid);
-        List<String> locations= new ArrayList<>();
-        for (int i=0; i<jsonArray.length(); i++){
-            try {
-                locations.add(jsonArray.get(i).toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        bundle.putStringArrayList(LOCATINS, (ArrayList<String>) locations);
-        this.setArguments(bundle);
     }
 
     @Override
@@ -587,6 +597,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         }
     }
+
+
+
 
 
 

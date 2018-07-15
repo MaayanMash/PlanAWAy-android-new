@@ -82,6 +82,7 @@ public class ModelFirebase {
         });
     }
 
+
     public User getMyUserDetails(final String uID, final MainActivity.GetUserDetailsCallback callback) {
         this.uID = uID;
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(uID);

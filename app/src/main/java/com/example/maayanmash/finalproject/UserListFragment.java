@@ -89,7 +89,6 @@ public class UserListFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-//        mListener = null;
     }
 
     //Menu

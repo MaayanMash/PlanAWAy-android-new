@@ -1,9 +1,16 @@
 package com.example.maayanmash.finalproject.Model.entities;
 
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
+
 import com.example.maayanmash.finalproject.Model.Constants;
 
+@Entity
 public class Destination {
+    @PrimaryKey
+    @NonNull
     private String dID;
     private String mID;
     private String name;
@@ -22,6 +29,11 @@ public class Destination {
 
     public Destination (String dID, Double latitude, Double longitude){
         this.dID = dID;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public Destination (Double latitude, Double longitude){
         this.latitude = latitude;
         this.longitude = longitude;
     }

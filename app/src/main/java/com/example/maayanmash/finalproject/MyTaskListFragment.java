@@ -32,6 +32,8 @@ import java.util.List;
 
 public class MyTaskListFragment extends Fragment {
     private ListAdapter adapter = new ListAdapter();
+    ListView list;
+    //TaskListViewModel dataModel;
     String uid;
     boolean isManager;
 
